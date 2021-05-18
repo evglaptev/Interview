@@ -2,8 +2,7 @@ using MediatR;
 
 namespace SberInterview.WebApi.Users.Get
 {
-    public class GetUserByLoginQuery : IRequest<User>
+    public class GetUserByLoginQuery : UserCommadBase<User>
     {
-        public string Login { get; set; }
     }
 }

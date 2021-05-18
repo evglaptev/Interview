@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SberInterview.WebApi.Accounts;
+using SberInterview.WebApi.Data.Repository.User;
 using SberInterview.WebApi.Users.Create;
 using SberInterview.WebApi.Users.Get;
 
@@ -16,20 +18,18 @@ namespace SberInterview.WebApi.Users
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController
+    public class UsersController : Controller
     {
         private readonly IMediator _mediator;
-        private readonly SberDbContext _context;
         private readonly IMapper _mapper;
 
-        public UsersController(IMediator mediator, SberDbContext context, IMapper mapper)
+        public UsersController(IMediator mediator, IMapper mapper)
         {
             _mediator = mediator;
-            _context = context;
             _mapper = mapper;
         }
 
-        [Authorize]
+        
         [HttpGet("{login}")]
         public async Task<User> GetUserByLoginAsync([FromBody] string login)
         {
@@ -43,11 +43,12 @@ namespace SberInterview.WebApi.Users
         [HttpGet("{login}/accounts")]
         public async Task<List<AccountVm>> GetUserAccountsAsync([FromBody] string login)
         {
-            var accounts = _context.Users
-                .ToList()
-                .Where(u => u.Login == login)
-                .Select(u => u.Accounts);
+            var accounts = _mediator.Send(new GetUserAccountsQuery
+            {
+                Login = login
+            });
 
+            // Я бы перенёс отсюда мапер на уровни ниже. И убрал бы маппер из зависимостей из данного контроллера
             return _mapper.Map<List<AccountVm>>(accounts);
         }
 
@@ -57,19 +58,11 @@ namespace SberInterview.WebApi.Users
             await _mediator.Send(command);
         }
 
-        [HttpGet("add")]
-        public async Task AddAccountToUserAsync(string login)
+        [Authorize]
+        [HttpPost("/add")]
+        public async Task AddAccountToUserAsync([FromQuery] AddUserAccountCommand command)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Login == login);
-            user.Accounts = new List<Account>
-            {
-                new Account
-                {
-                    UserLogin = user.Login
-                }
-            };
-
-            _context.SaveChangesAsync().Wait();
+            await _mediator.Send(command);
         }
     }
 }

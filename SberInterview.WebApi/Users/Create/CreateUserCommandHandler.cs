@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -20,6 +21,12 @@ namespace SberInterview.WebApi.Users
 
         public async Task<Unit> Handle(CreateUserCommand command, CancellationToken cancellationToken)
         {
+            // Валидация нужна во всех Handle, но должна выглядеть иначе. Можно расширить интерфейс IRequest методом Validate
+            if (command == null && command.Email == null && command.FirstName == null && command.LastName == null && command.Login == null && command.Password == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
             _context.Add(_mapper.Map<User>(command));
             _context.SaveChanges();
             

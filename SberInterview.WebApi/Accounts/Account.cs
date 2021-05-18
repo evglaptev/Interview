@@ -10,6 +10,7 @@ namespace SberInterview.WebApi.Accounts
         
         public User User { get; set; }
         
+        // UserLogin не нужен, потому что есть ссылка на юзера
         public string UserLogin { get; set; }
     }
 }
