@@ -1,23 +1,25 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using SberInterview.WebApi.Accounts;
 
 namespace SberInterview.WebApi.Users.Get
 {
-    public class GetUserByLoginQueryHandler : IRequestHandler<GetUserByLoginQuery, User>
+    public class GetUserAccountsHandler : IRequestHandler<GetUserAccountsQuery, ICollection<Account>>
     {
         private readonly UsersRepository _usersRepository;
         private readonly ILogger<GetUserByLoginQueryHandler> _logger;
 
-        public GetUserByLoginQueryHandler(UsersRepository usersRepository, ILoggerFactory loggerFactory)
+        public GetUserAccountsHandler(UsersRepository usersRepository, ILoggerFactory loggerFactory)
         {
             _usersRepository = usersRepository;
             _logger = loggerFactory.CreateLogger<GetUserByLoginQueryHandler>();
         }
 
-        public async Task<User> Handle(GetUserByLoginQuery request, CancellationToken cancellationToken)
+        public async Task<ICollection<Account>> Handle(GetUserAccountsQuery request, CancellationToken cancellationToken)
         {
             if (request == null)
             {
@@ -26,7 +28,7 @@ namespace SberInterview.WebApi.Users.Get
             try
             {
                 var user = await _usersRepository.GetUserByLoginAsync(request.Login, cancellationToken);
-                return user;
+                return user.Accounts;
             }
             catch (Exception e)
             {

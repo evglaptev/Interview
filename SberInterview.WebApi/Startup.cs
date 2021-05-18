@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SberInterview.WebApi.Data.Repository.User;
 using SberInterview.WebApi.Users;
 
 namespace SberInterview.WebApi
@@ -20,7 +21,7 @@ namespace SberInterview.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<SberDbContext>();
-            services.AddSingleton<UsersRepository>();
+            services.AddScoped<IUserRepository,UsersRepository>();
             
             services.AddControllers();
         }
